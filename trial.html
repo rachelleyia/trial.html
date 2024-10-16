@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do App with Deadlines</title>
+    <style>
+        .done {
+            color: green;
+        }
+        .missed {
+            color: red;
+        }
+        .pending {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+    <h1>To-Do List</h1>
+    <input type="text" id="taskInput" placeholder="Enter your task">
+    <input type="datetime-local" id="deadlineInput" placeholder="Enter deadline">
+    <button onclick="addTask()">Add Task</button>
+
+    <ul id="taskList"></ul>
+
+    <script>
+        // Task object constructor
+        function Task(name, deadline) {
+            this.name = name;
+            this.dateAdded = new Date().toLocaleString();
+            this.deadline = deadline;
+            this.isDone = false;
+        }
+
+        // Task Manager object
+        const taskManager = {
+            tasks: [],
+            
+            // Add a new task
+            addTask(taskName, deadline) {
+                const newTask = new Task(taskName, deadline);
+                this.tasks.push(newTask);
+                this.displayTasks();
+            },
+
+            // Mark a task as done
+            markTaskAsDone(index) {
+                this.tasks[index].isDone = true;
+                this.displayTasks();
+            },
+
+            // Delete a task
+            deleteTask(index) {
+                this.tasks.splice(index, 1);
+                this.displayTasks();
+            },
+
+            // Check if a task is missed
+            checkIfMissed(task) {
+                const now = new Date();
+                const deadline = new Date(task.deadline);
+                return now > deadline && !task.isDone;
+            },
+
+            // Display tasks
+            displayTasks() {
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = '';
+                this.tasks.forEach((task, index) => {
+                    const listItem = document.createElement('li');
+                    const isMissed = this.checkIfMissed(task);
+                    listItem.innerHTML = `${task.name} - Deadline: ${new Date(task.deadline).toLocaleString()} 
+                    <button onclick="markTaskAsDone(${index})">Mark as Done</button>
+                    <button onclick="deleteTask(${index})">Delete</button>`;
+                    
+                    // Add classes based on task status
+                    if (task.isDone) {
+                        listItem.classList.add('done');
+                    } else if (isMissed) {
+                        listItem.classList.add('missed');
+                    } else {
+                        listItem.classList.add('pending'); // Apply pending class for tasks that are not done or missed
+                    }
+                    
+                    taskList.appendChild(listItem);
+                });
+            }
+        };
+
+        // Function to handle adding a task
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const deadlineInput = document.getElementById('deadlineInput');
+            const taskName = taskInput.value;
+            const deadline = deadlineInput.value;
+            
+            if (taskName.trim() && deadline) {
+                taskManager.addTask(taskName, deadline);
+                taskInput.value = ''; // Clear input field after adding
+                deadlineInput.value = ''; // Clear deadline field after adding
+            } else {
+                alert("Please enter a valid task and deadline.");
+            }
+        }
+
+        // Function to mark a task as done
+        function markTaskAsDone(index) {
+            taskManager.markTaskAsDone(index);
+        }
+
+        // Function to delete a task
+        function deleteTask(index) {
+            taskManager.deleteTask(index);
+        }
+    </script>
+</body>
+</html>
